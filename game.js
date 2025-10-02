@@ -131,3 +131,129 @@ function update(dt){
 
 // --- Animation loop ---
 function animate(){request
+document.addEventListener('DOMContentLoaded', () => {
+
+  const f1Cars=[
+    {name:"Ferrari SF-24", color:0xff0000},
+    {name:"Mercedes W15", color:0xaaaaaa},
+    {name:"Red Bull RB20", color:0x0000ff},
+    {name:"McLaren MCL38", color:0xff6600},
+    {name:"Aston Martin AMR24", color:0x006600}
+  ];
+  const AI_COUNT=10;
+  const LAP_COUNT=3;
+  const TRACK_POINTS=[
+    {x:0,z:300},{x:200,z:300},{x:400,z:100},{x:400,z:-100},{x:200,z:-300},
+    {x:0,z:-300},{x:-200,z:-300},{x:-400,z:-100},{x:-400,z:100},{x:-200,z:300}
+  ];
+
+  let vehicles=[], aiCars=[], playerCar=null;
+  let scene, camera, renderer, clock, keys={}, lap=0, bestLapTime=0, startTime=0;
+  let currentWaypoint=0, cameraMode='third';
+  let gear=1, raceStarted=false, allowPlayerMove=false;
+
+  // --- Elements ---
+  const carSelect=document.getElementById('carSelect');
+  const startBtn=document.getElementById('startRace');
+  const menuDiv=document.getElementById('menu');
+  const lightsDiv=document.getElementById('lights');
+  const lightEls=[...document.querySelectorAll('.light')];
+
+  // Fill car select
+  f1Cars.forEach((c,i)=>{
+    let opt=document.createElement('option');
+    opt.value=i; opt.textContent=c.name;
+    carSelect.appendChild(opt);
+  });
+
+  // Lights countdown
+  function startLights(callback){
+    lightsDiv.style.display='flex';
+    allowPlayerMove=false;
+    let i=0;
+    function nextLight(){
+      if(i>0) lightEls[i-1].classList.remove('on');
+      if(i<5){
+        lightEls[i].classList.add('on');
+        i++;
+        setTimeout(nextLight,700);
+      } else {
+        lightsDiv.style.display='none';
+        allowPlayerMove=true;
+        raceStarted=true;
+        callback();
+      }
+    }
+    nextLight();
+  }
+
+  // Initialize game
+  function initGame(){
+    scene=new THREE.Scene();
+    camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,5000);
+    renderer=new THREE.WebGLRenderer({canvas:document.getElementById('game')});
+    renderer.setSize(window.innerWidth,window.innerHeight);
+    clock=new THREE.Clock();
+
+    scene.add(new THREE.HemisphereLight(0xffffff,0x444444,1));
+    let dirLight=new THREE.DirectionalLight(0xffffff,0.6); dirLight.position.set(100,200,100); scene.add(dirLight);
+
+    // Track
+    let trackGeom=new THREE.Shape();
+    TRACK_POINTS.forEach((p,i)=> i===0 ? trackGeom.moveTo(p.x,p.z) : trackGeom.lineTo(p.x,p.z));
+    trackGeom.lineTo(TRACK_POINTS[0].x,TRACK_POINTS[0].z);
+    let extrude=new THREE.ExtrudeGeometry(trackGeom,{depth:10,bevelEnabled:false});
+    let trackMesh=new THREE.Mesh(extrude,new THREE.MeshPhongMaterial({color:0x333333}));
+    trackMesh.rotation.x=-Math.PI/2; scene.add(trackMesh);
+
+    let grass=new THREE.Mesh(new THREE.PlaneGeometry(1000,1000), new THREE.MeshPhongMaterial({color:0x0a3d0a}));
+    grass.rotation.x=-Math.PI/2; scene.add(grass);
+
+    // Player car
+    let carGeom=new THREE.BoxGeometry(10,4,20);
+    let carMat=new THREE.MeshPhongMaterial({color:f1Cars[carSelect.value].color});
+    playerCar=new THREE.Mesh(carGeom,carMat);
+    playerCar.position.set(TRACK_POINTS[0].x,2,TRACK_POINTS[0].z);
+    scene.add(playerCar); vehicles.push(playerCar);
+
+    // AI cars
+    for(let i=0;i<AI_COUNT;i++){
+      let ai=new THREE.Mesh(carGeom,new THREE.MeshPhongMaterial({color:Math.random()*0xffffff}));
+      ai.position.set(TRACK_POINTS[0].x + (Math.random()*20-10),2,TRACK_POINTS[0].z + (Math.random()*20-10));
+      scene.add(ai); aiCars.push({mesh:ai, waypoint:1, speed:2+Math.random()*1, lap:0}); vehicles.push(ai);
+    }
+
+    camera.position.set(0,50,-80); camera.lookAt(playerCar.position);
+
+    window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth,window.innerHeight);});
+    document.addEventListener('keydown',e=>keys[e.key]=true);
+    document.addEventListener('keyup',e=>keys[e.key]=false);
+    document.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='c') cameraMode=cameraMode==='third'?'first':'third';});
+  }
+
+  function update(dt){
+    if(raceStarted){
+      let accel=0, rotSpeed=0;
+      if(allowPlayerMove && (keys['ArrowUp']||keys['w'])) accel=Math.min(120*dt,60*dt);
+      if(allowPlayerMove && (keys['ArrowDown']||keys['s'])) accel=-80*dt;
+      if(keys['ArrowLeft']||keys['a']) rotSpeed=1.5*dt;
+      if(keys['ArrowRight']||keys['d']) rotSpeed=-1.5*dt;
+      playerCar.rotation.y+=rotSpeed;
+      playerCar.translateZ(accel);
+      gear=Math.min(7,Math.max(1,Math.floor(Math.abs(accel)/20)));
+
+      document.getElementById('speed').textContent="Speed: "+Math.round(accel/dt)+" km/h";
+      document.getElementById('gear').textContent="Gear: "+gear;
+    }
+  }
+
+  function animate(){
+    requestAnimationFrame(animate);
+    let dt=clock.getDelta();
+    update(dt);
+    renderer.render(scene,camera);
+  }
+
+  // --- Race button ---
+  startBtn.addEventListener('click',()=>{
+    menuDiv.style.display='none
