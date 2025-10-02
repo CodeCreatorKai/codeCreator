@@ -2,12 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Haunted Stickman Road</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Haunted Crossy Road</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    canvas {
+      background: #111;
+      display: block;
+    }
+  </style>
 </head>
 <body>
   <canvas id="gameCanvas"></canvas>
+
+  <!-- Spooky Sounds -->
+  <audio id="bgMusic" src="https://actions.google.com/sounds/v1/horror/ghost_breath.ogg" loop></audio>
+  <audio id="deathSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+  <audio id="powerUpSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+  <audio id="victorySound" src="https://actions.google.com/sounds/v1/cartoon/congratulations.ogg"></audio>
+
   <script src="game.js"></script>
 </body>
 </html>
