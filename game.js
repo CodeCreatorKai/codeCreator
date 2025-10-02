@@ -1,4 +1,3 @@
-// === Configuration ===
 const f1Cars=[
   {name:"Ferrari SF-24", color:0xff0000},
   {name:"Mercedes W15", color:0xaaaaaa},
@@ -18,13 +17,9 @@ let scene, camera, renderer, clock, keys={}, lap=0, bestLapTime=0, startTime=0;
 let currentWaypoint=0, cameraMode='third';
 let gear=1, raceStarted=false;
 
-// === Menu ===
 const carSelect=document.getElementById('carSelect');
-f1Cars.forEach((c,i)=>{
-  let o=document.createElement('option'); o.value=i; o.textContent=c.name; carSelect.appendChild(o);
-});
+f1Cars.forEach((c,i)=>{let o=document.createElement('option'); o.value=i; o.textContent=c.name; carSelect.appendChild(o);});
 
-// === Lights ===
 const lightsDiv=document.getElementById('lights');
 const lightEls=[...document.querySelectorAll('.light')];
 
@@ -46,7 +41,7 @@ function startLights(callback){
   nextLight();
 }
 
-// === Initialization ===
+// Initialize scene, camera, cars
 function init(){
   scene=new THREE.Scene();
   camera=new THREE.PerspectiveCamera(75,window.innerWidth/window.innerHeight,0.1,5000);
@@ -58,7 +53,6 @@ function init(){
   let dirLight=new THREE.DirectionalLight(0xffffff,0.6);
   dirLight.position.set(100,200,100); scene.add(dirLight);
 
-  // Track
   let trackGeom=new THREE.Shape();
   TRACK_POINTS.forEach((p,i)=> i===0 ? trackGeom.moveTo(p.x,p.z) : trackGeom.lineTo(p.x,p.z));
   trackGeom.lineTo(TRACK_POINTS[0].x,TRACK_POINTS[0].z);
@@ -66,7 +60,6 @@ function init(){
   let trackMesh=new THREE.Mesh(extrude,new THREE.MeshPhongMaterial({color:0x333333}));
   trackMesh.rotation.x=-Math.PI/2; scene.add(trackMesh);
 
-  // Grass
   let grass=new THREE.Mesh(new THREE.PlaneGeometry(1000,1000), new THREE.MeshPhongMaterial({color:0x0a3d0a}));
   grass.rotation.x=-Math.PI/2; scene.add(grass);
 
@@ -92,11 +85,10 @@ function init(){
   document.addEventListener('keydown',e=>{if(e.key.toLowerCase()==='c') cameraMode=cameraMode==='third'?'first':'third';});
 }
 
-// === Physics & AI ===
 function update(dt){
   if(raceStarted){
     let accel=0, rotSpeed=0;
-    if((keys['ArrowUp']||keys['w'])) accel=Math.min(120*dt,60*dt); // launch control
+    if((keys['ArrowUp']||keys['w'])) accel=Math.min(120*dt,60*dt);
     if(keys['ArrowDown']||keys['s']) accel=-80*dt;
     if(keys['ArrowLeft']||keys['a']) rotSpeed=1.5*dt;
     if(keys['ArrowRight']||keys['d']) rotSpeed=-1.5*dt;
@@ -104,42 +96,9 @@ function update(dt){
     playerCar.translateZ(accel);
     gear=Math.min(7,Math.max(1,Math.floor(Math.abs(accel)/20)));
 
-    // Waypoint & lap
+    // Waypoints & laps
     let wp=TRACK_POINTS[currentWaypoint], dx=wp.x-playerCar.position.x, dz=wp.z-playerCar.position.z;
     if(Math.sqrt(dx*dx+dz*dz)<15){currentWaypoint=(currentWaypoint+1)%TRACK_POINTS.length; if(currentWaypoint===0){lap++; let lapTime=(performance.now()-startTime)/1000; if(bestLapTime===0 || lapTime<bestLapTime) bestLapTime=lapTime; startTime=performance.now();}}
 
-    // AI
-    aiCars.forEach(ai=>{
-      let target=TRACK_POINTS[ai.waypoint], dx=target.x-ai.mesh.position.x, dz=target.z-ai.mesh.position.z;
-      let angle=Math.atan2(dz,dx), dist=Math.sqrt(dx*dx+dz*dz);
-      vehicles.forEach(v=>{if(v!==ai.mesh){let d=Math.hypot(v.position.x-ai.mesh.position.x,v.position.z-ai.mesh.position.z); if(d<20) ai.speed=Math.max(1,ai.speed-0.5*dt);}});
-      if(Math.abs(Math.sin(angle))<0.1) ai.speed=Math.min(4,ai.speed+0.5*dt);
-      ai.mesh.rotation.y=angle-Math.PI/2;
-      let speed=ai.speed*dt*60;
-      ai.mesh.position.x+=Math.cos(angle)*speed;
-      ai.mesh.position.z+=Math.sin(angle)*speed;
-      if(dist<10) ai.waypoint=(ai.waypoint+1)%TRACK_POINTS.length;
-    });
+    //
 
-    // Camera
-    if(cameraMode==='third'){let offset=new THREE.Vector3(0,30,-60); offset.applyAxisAngle(new THREE.Vector3(0,1,0),playerCar.rotation.y); camera.position.copy(playerCar.position.clone().add(offset)); camera.lookAt(playerCar.position);}
-    else {let offset=new THREE.Vector3(0,4,2); offset.applyAxisAngle(new THREE.Vector3(0,1,0),playerCar.rotation.y); camera.position.copy(playerCar.position.clone().add(offset)); let lookAt=new THREE.Vector3(0,4,50); lookAt.applyAxisAngle(new THREE.Vector3(0,1,0),playerCar.rotation.y); camera.lookAt(playerCar.position.clone().add(lookAt));}
-
-    // HUD
-    document.getElementById('lap').textContent="Lap: "+lap+"/"+LAP_COUNT;
-    document.getElementById('speed').textContent="Speed: "+Math.round(accel/dt)+" km/h";
-    document.getElementById('gear').textContent="Gear: "+gear;
-    document.getElementById('pos').textContent="Position: 1";
-    document.getElementById('bestlap').textContent="Best Lap: "+(bestLapTime>0?bestLapTime.toFixed(2)+"s":"--");
-  }
-}
-
-// === Animation loop ===
-function animate(){requestAnimationFrame(animate); let dt=clock.getDelta(); update(dt); renderer.render(scene,camera);}
-
-// === Start race ===
-document.getElementById('startRace').onclick=()=>{
-  document.getElementById('menu').style.display='none';
-  init();
-  startLights(()=>animate());
-};
