@@ -10,7 +10,7 @@ html, body {height:100%; margin:0; overflow:hidden; background:#111; color:#eee;
 #hud div {margin-bottom:4px;}
 #menu {position:absolute; top:0; left:0; width:100%; height:100%; background:#000d; display:flex; align-items:center; justify-content:center; flex-direction:column; z-index:20; color:#fff;}
 #menu button {margin:8px; padding:10px 16px; background:#222; border:1px solid #444; color:#fff; border-radius:8px; cursor:pointer;}
-#lights {position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:30; display:flex; flex-direction:column; align-items:center;}
+#lights {position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:30; display:flex; flex-direction:row; align-items:center; justify-content:center;}
 .light {width:40px; height:40px; margin:5px; border-radius:50%; background:#500; box-shadow:0 0 5px #000;}
 .light.on {background:red; box-shadow:0 0 20px red;}
 canvas {display:block; width:100vw; height:100vh;}
@@ -33,7 +33,8 @@ canvas {display:block; width:100vw; height:100vh;}
   <p>Press <strong>C</strong> to toggle First/Third Person camera</p>
 </div>
 
-<div id="lights">
+<!-- Lights only visible after pressing Race -->
+<div id="lights" style="display:none;">
   <div class="light" id="light1"></div>
   <div class="light" id="light2"></div>
   <div class="light" id="light3"></div>
@@ -43,10 +44,8 @@ canvas {display:block; width:100vw; height:100vh;}
 
 <canvas id="game"></canvas>
 
-<!-- Three.js library -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-
-<!-- Game script -->
 <script src="game.js"></script>
 </body>
 </html>
+
