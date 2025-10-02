@@ -1,17 +1,13 @@
 body {
-    margin: 0;
-    background-color: #111; /* dark haunted background */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
-    font-family: Arial, sans-serif;
+  margin: 0;
+  background-color: #111;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
 canvas {
-    background: linear-gradient(#222, #111); /* haunted road feel */
-    display: block;
-    border: 3px solid #fff;
+  background: linear-gradient(#333, #111);
+  border: 3px solid #fff;
 }
-
