@@ -1,13 +1,14 @@
 body {
   margin: 0;
-  background-color: #111;
+  background: black;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
+  overflow: hidden;
 }
-
 canvas {
   background: linear-gradient(#333, #111);
+  display: block;
   border: 3px solid #fff;
 }
