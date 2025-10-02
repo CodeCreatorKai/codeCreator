@@ -130,3 +130,53 @@ startBtn.addEventListener('click',()=>{
   initGame();
   startLights(()=>animate());
 });
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F1 Realistic Racer</title>
+<style>
+html, body {height:100%; margin:0; overflow:hidden; background:#111; color:#eee; font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;}
+#hud {position:absolute; top:10px; left:10px; z-index:10; color:#eee; font-size:14px;}
+#hud div {margin-bottom:4px;}
+#menu {position:absolute; top:0; left:0; width:100%; height:100%; background:#000d; display:flex; align-items:center; justify-content:center; flex-direction:column; z-index:20; color:#fff;}
+#menu button {margin:8px; padding:10px 16px; background:#222; border:1px solid #444; color:#fff; border-radius:8px; cursor:pointer;}
+#lights {position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:30; display:flex; flex-direction:row; align-items:center; justify-content:center; display:none;}
+.light {width:40px; height:40px; margin:5px; border-radius:50%; background:#500; box-shadow:0 0 5px #000;}
+.light.on {background:red; box-shadow:0 0 20px red;}
+canvas {display:block; width:100vw; height:100vh;}
+</style>
+</head>
+<body>
+
+<div id="hud">
+  <div id="lap">Lap: 0/3</div>
+  <div id="pos">Position: --</div>
+  <div id="speed">Speed: 0 km/h</div>
+  <div id="gear">Gear: 1</div>
+  <div id="bestlap">Best Lap: --</div>
+</div>
+
+<div id="menu">
+  <h1>F1 Realistic Racer</h1>
+  <p>Select your car and start the race</p>
+  <select id="carSelect"></select>
+  <button id="startRace">Race</button>
+  <p>Press <strong>C</strong> to toggle First/Third Person camera</p>
+</div>
+
+<div id="lights">
+  <div class="light" id="light1"></div>
+  <div class="light" id="light2"></div>
+  <div class="light" id="light3"></div>
+  <div class="light" id="light4"></div>
+  <div class="light" id="light5"></div>
+</div>
+
+<canvas id="game"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
